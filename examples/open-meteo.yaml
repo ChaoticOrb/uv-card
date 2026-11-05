@@ -1,0 +1,24 @@
+# Add to configuration.yaml. Uses your Home Assistant home location.
+rest:
+  - resource_template: >-
+      https://api.open-meteo.com/v1/forecast?latitude={{ state_attr('zone.home','latitude') }}&longitude={{ state_attr('zone.home','longitude') }}&current=uv_index&hourly=uv_index&daily=uv_index_max&timezone=auto&forecast_days=2
+    scan_interval: 900
+    sensor:
+      - name: "UV Index"
+        value_template: "{{ value_json.current.uv_index }}"
+        unit_of_measurement: "UV index"
+        state_class: measurement
+      - name: "UV Index Max Today"
+        value_template: "{{ value_json.daily.uv_index_max[0] }}"
+        unit_of_measurement: "UV index"
+        state_class: measurement
+      - name: "UV Index Max Tomorrow"
+        value_template: "{{ value_json.daily.uv_index_max[1] }}"
+        unit_of_measurement: "UV index"
+        state_class: measurement
+      - name: "UV Forecast"
+        value_template: "{{ value_json.hourly.uv_index | max }}"
+        json_attributes_path: "$.hourly"
+        json_attributes:
+          - time
+          - uv_index
